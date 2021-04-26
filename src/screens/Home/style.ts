@@ -15,6 +15,8 @@ type Styles = {
   settings_button: TextStyle,
   modal: ViewStyle,
   modal_text: TextStyle,
+  button_wrapper: ViewStyle,
+  modal_button: ViewStyle,
 }
 
 export const styles = StyleSheet.create<Styles>({
@@ -81,5 +83,15 @@ export const styles = StyleSheet.create<Styles>({
   modal_text: {
     textAlign: 'center',
     fontSize: 22,
-  }
+  },
+  button_wrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  modal_button: {
+    backgroundColor: '#0660cb',
+    alignItems: 'center',
+    width: 120,
+    marginTop: 15,
+  },
 })

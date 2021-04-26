@@ -14,6 +14,7 @@ type Styles = {
   input_surname: ViewStyle,
   button: ViewStyle,
   button_title: TextStyle,
+  home_button: TextStyle,
 }
 
 export const styles = StyleSheet.create<Styles>({
@@ -69,5 +70,13 @@ export const styles = StyleSheet.create<Styles>({
     fontWeight: 'bold',
     color: '#fff',
     marginVertical: 15,
+  },
+  home_button: {
+    color: '#fff',
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
+    fontSize: 17,
+    textAlign: 'center',
+    marginTop: 15,
   },
 })

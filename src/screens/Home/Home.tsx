@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   StatusBar,
@@ -13,25 +13,83 @@ import {
 } from 'react-native-paper';
 import { styles } from './style';
 import { HomeProps } from '../../navigation/types';
-import { useMachine } from "@xstate/react";
+import { useMachine } from '@xstate/react';
 import { machineConfig } from '../../XState/machineConfig';
+import { LogInMachineContext } from '../../XState/context';
 
 export const Home = ({ navigation }: HomeProps) => {
 
-  const [machine, send] = useMachine(machineConfig);
-  // console.log(machine.value);
-  
-  const [form, setForm] = useState({
-    name: '',
-    surname: '',
-  });
-  console.log(form);
+  const [machine, setMachine] = useMachine(machineConfig);
+  // const [machine, setMachine] = useContext(LogInMachineContext);
+  console.log(machine.value);
+  console.log(machine.context);
+
+  const updateName = (e: string) => {
+    setMachine({ type: 'CHANGE_NAME', data: e });
+  }
+
+  const updateSurname = (e: string) => {
+    setMachine({ type: 'CHANGE_SURNAME', data: e });
+  }
+
+  // const [form, setForm] = useState({
+  //   name: '',
+  //   surname: '',
+  // });
+  // console.log(form);
+
+  // const updateName = (text) => {
+  //   let temp = {...form}
+  //   temp.name = text
+  //   setForm(temp)
+  // }
+
+  // const updateSurname = (text) => {
+  //   let temp = {...form}
+  //   temp.surname = text
+  //   setForm(temp)
+  // }
 
   const [visible, setVisible] = useState(false);
 
-  const showModal = () => setVisible(true);
+  // const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
+  const submitClick = () => {
+    setVisible(true);
+    setMachine('SUBMIT');
+  }
+
+  const settingsClick = () => {
+    // setMachine('SUBMIT');
+    navigation.navigate('Settings', { 
+        name: machine.context.name,
+        surname: machine.context.surname,
+      });
+    // (machine.matches({ nameError: 'tooShort' }) ||
+    // machine.matches({ surnameError: 'tooShort' })) ? 
+    // null
+    // :
+    // navigation.navigate('Settings', { 
+    //   name: machine.context.name,
+    //   surname: machine.context.surname,
+    // });
+  }
+
+  const okClick = () => {
+    setMachine('REGISTER');
+    setVisible(false);
+  }
+
+  const editClick = () => {
+    setMachine('CHANGE');
+    setVisible(false);
+    navigation.navigate('Settings', { 
+      name: machine.context.name,
+      surname: machine.context.surname,
+    });
+  }
+  
   return (
     <View style={styles.container}>
       <StatusBar
@@ -42,27 +100,29 @@ export const Home = ({ navigation }: HomeProps) => {
       <TextInput 
         style={styles.input_name}
         placeholder="type here your name..."
-        // onChange={text => setForm({...form, name: text.target.value})}
-        onChangeText={setForm}
-        value={form.name}
+        onChangeText={updateName}
+        onEndEditing={() => setMachine('NAME_BLUR')}
+        value={machine.context.name}
+        // value={form.name}
       />
       <Text style={styles.input_title}>Surname:</Text>
       <TextInput 
         style={styles.input_surname}
         placeholder="type here your surname..."
-        // onChange={text => setForm({...form, surname: text.target.value})}
-        onChangeText={setForm}
-        value={form.surname}
+        onChangeText={updateSurname}
+        onEndEditing={() => setMachine('SURNAME_BLUR')}
+        value={machine.context.surname}
+        // value={form.surname}
       />
       <TouchableOpacity
         style={styles.button}
-        onPress={showModal}
+        onPress={submitClick}
       >
         <Text style={styles.button_title}>Sign In</Text>
       </TouchableOpacity>
       <Text 
         style={styles.settings_button}
-        onPress={() => navigation.navigate('Settings')}
+        onPress={settingsClick}
       >
         Settings
       </Text>
@@ -72,7 +132,34 @@ export const Home = ({ navigation }: HomeProps) => {
             visible={visible} 
             onDismiss={hideModal} 
             contentContainerStyle={styles.modal}>
-            <Text style={styles.modal_text}>Hello Mr. ___ .{`\n`} Nice to meet you</Text>
+            {machine.matches('submiting') ? (
+              <View>
+                <Text style={styles.modal_text}>
+                  Hello Mr. {machine.context.surname} {machine.context.name}.{`\n`} 
+                  Nice to meet you 
+                </Text>
+                <View style={styles.button_wrapper}>
+                  <TouchableOpacity 
+                    style={styles.modal_button}
+                    onPress={okClick}
+                  >
+                    <Text style={styles.button_title}>OK</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.modal_button}
+                    onPress={editClick}
+                  >
+                    <Text style={styles.button_title}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : null}
+            {machine.matches({ nameError: 'tooShort' }) ? (
+              <Text style={styles.modal_text}>Too short name</Text>
+            ) : null}
+            {machine.matches({ surnameError: 'tooShort' }) ? (
+              <Text style={styles.modal_text}>Too short surname</Text>
+            ) : null}
           </Modal>
         </Portal>
       </Provider>

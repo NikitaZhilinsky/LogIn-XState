@@ -1,43 +1,123 @@
-import { isValidElement } from 'react';
-import { Machine } from 'xstate';
+import { Machine, assign, DoneInvokeEvent } from 'xstate';
 
-export const machineConfig = Machine(
+export interface Context {
+  name: string;
+  surname: string;
+}
+
+type Event = DoneInvokeEvent<any>;
+
+const isNameEmpty = (context: Context) => context.name.length === 0;
+const isSurnameEmpty = (context: Context, _) => context.surname.length == 0;
+
+export const machineConfig = Machine<Context, Event>(
   {
     id: 'LogIn',
-    initial: 'idle',
-    // context: {
-    //   name: '',
-    //   surname: '',
-    // },
+    initial: 'editing',
+    context: {
+      name: '',
+      surname: '',
+    },
     states: {
-      idle: {
+      editing: {
         on: {
+          CHANGE_NAME: {
+            actions: 'changeUserName',
+          },
+          CHANGE_SURNAME: {
+            actions: 'changeUserSurname',
+          },
+          NAME_BLUR: {
+            cond: isNameEmpty,
+            // cond: (context: Context, _) => context.name.length == 0,
+            target: 'nameError.tooShort',
+          },
+          SURNAME_BLUR: {
+            cond: isSurnameEmpty,
+            target: 'surnameError.tooShort',
+          },
           SUBMIT: [
             {
-              target: 'loading',
-              cond: 'isValid',
+              cond: isNameEmpty,
+              // cond: (context: Context, _) => context.name.length == 0,
+              target: 'nameError.tooShort',
             },
             {
-              target: 'signError',
+              cond: isSurnameEmpty,
+              target: 'surnameError.tooShort',
             },
-          ] 
+            {
+              // target: 'settingsEditing',
+              target: 'submiting',
+            },
+          ], 
         },
       },
-      loading: {
+      submiting: {
         on: {
-          onDone: {
+          REGISTER: {
             target: 'signedIn',
           },
-          onError: {
-            target: 'signError',
+          CHANGE: {
+            target: 'editing',
           },
         },
       },
-      signError: {
+      // settingsEditing: {
+      //   on: {
+      //     CHANGE_NAME: {
+      //       actions: 'changeUserName',
+      //     },
+      //     CHANGE_SURNAME: {
+      //       actions: 'changeUserSurname',
+      //     },
+      //     NAME_BLUR: {
+      //       cond: isNameEmpty,
+      //       // cond: (context: Context, _) => context.name.length == 0,
+      //       target: 'nameError.tooShort',
+      //     },
+      //     SURNAME_BLUR: {
+      //       cond: isSurnameEmpty,
+      //       target: 'surnameError.tooShort',
+      //     },
+      //     SUBMIT: [
+      //       {
+      //         cond: isNameEmpty,
+      //         // cond: (context: Context, _) => context.name.length == 0,
+      //         target: 'nameError.tooShort',
+      //       },
+      //       {
+      //         cond: isSurnameEmpty,
+      //         target: 'surnameError.tooShort',
+      //       },
+      //       {
+      //         target: 'editing',
+      //       },
+      //     ], 
+      //   },
+      // },
+      nameError: {
         on: {
-          SUBMIT: {
-            target: 'loading',
+          CHANGE_NAME: {
+            actions: 'changeUserName',
+            target: 'editing',
           },
+        },
+        initial: 'tooShort',
+        states: {
+          tooShort: {},
+        },
+      },
+      surnameError: {
+        on: {
+          CHANGE_SURNAME: {
+            actions: 'changeUserSurname',
+            target: 'editing',
+          },
+        },
+        initial: 'tooShort',
+        states: {
+          tooShort: {},
         },
       },
       signedIn: {
@@ -46,145 +126,19 @@ export const machineConfig = Machine(
     },
   },
   {
-    guards: {
-      isValid: (context, event) => event.data.name !== '' && event.data.surname !== '',
-    }
+    actions: {
+      changeUserName: assign({
+        name: (_, event) => event.data,
+      }),
+      changeUserSurname: assign({
+        surname: (_, event) => event.data,
+      }),
+    },
   },
+  // {
+  //   guards: {
+  //     isNameEmpty: (context, event) => context.name.length !== 0,
+  //     isSurnameEmpty: (context, event) => context.surname.length !== 0,
+  //   },
+  // },
 )
-
-// export const machineConfig = Machine({
-//   id: 'LogIn',
-//   initial: 'dataEntry',
-//   context: {
-//     name: '',
-//     surname: '',
-//   },
-//   states: {
-//     dataEntry: {
-//       on: {
-//         ENTER_NAME: {
-//           actions: 'cacheName', 
-//         },
-//         ENTER_SURNAME: {
-//           actions: 'cacheSurame', 
-//         },
-//         SUBMIT: {
-//           target: 'submitting',
-//         }, 
-//       }
-//     },
-//     submitting: {
-//       invoke: {
-//         src: 'submit',
-//         onDone: {
-//           target: 'signedIn',
-//         },
-//         onError: {
-//           target: 'signError',
-//         },
-//       }
-//     },
-//     signedIn: {
-//       type: 'final',
-//     },
-//     signError: {
-//       on: {
-//         ENTER_NAME: {
-//           target: 'dataEntry',
-//           actions: 'cacheName', 
-//         },
-//         ENTER_SURNAME: {
-//           target: 'dataEntry',
-//           actions: 'cacheSurame', 
-//         },
-//       }
-//     },
-//   }
-// })
-
-// export const machineConfig = Machine({
-//   id: 'LogIn',
-//   initial: 'dataEntry',
-//   context: {
-//     name: '',
-//     surname: '',
-//   },
-//   states: {
-//     dataEntry: {
-//       on: {
-//         ENTER_NAME: {
-//           actions: 'cacheName', 
-//         },
-//         ENTER_SURNAME: {
-//           actions: 'cacheSurame', 
-//         },
-//         // NAME_INCORRECT: [
-//         //   {
-//         //     cond: 'isNameTooShort',
-//         //     target: 'nameError.tooShort'
-//         //   },
-//         //   {
-//         //     cond: 'isBadNameFormat',
-//         //     target: 'nameError.badFormat'
-//         //   },
-//         // ],
-//         // SURNAME_INCORRECT: [ 
-//         //   {
-//         //     cond: 'isSurnameTooShort',
-//         //     target: 'surnameError.tooShort'
-//         //   },
-//         //   {
-//         //     cond: 'isBadSurnameFormat',
-//         //     target: 'surnameError.badFormat'
-//         //   },
-//         // ],
-//         SUBMIT: {
-//             target: 'checkingInfo',
-//         }, 
-//       }
-//     },
-//     checkingInfo: {
-//       invoke: {
-//         src: 'requestSignIn',
-//         onDone: {
-//           target: 'signedIn'
-//         },
-//         onError: {
-//           target: ''
-//         },
-//       }
-//     },
-//     nameError: {
-//       on: {
-//         ENTER_NAME: {
-//           actions: 'cacheName', 
-//           target: 'dataEntry',
-//         },
-//       },
-//       initial: 'tooShort',
-//       states: {
-//         tooShort: {},
-//         badFormat: {},
-//       },
-//     },
-//     surnameError: {
-//       on: {
-//         ENTER_SURNAME: {
-//           actions: 'cacheSurname', 
-//           target: 'dataEntry',
-//         },
-//       },
-//       initial: 'tooShort',
-//       states: {
-//         tooShort: {},
-//         badFormat: {},
-//       },
-//     },
-//     signedIn: {
-//       type: 'final',
-//     },
-//     onDone: {
-//       actions: 'onAuthentication'
-//     },
-//   }
-// })
