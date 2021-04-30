@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   StatusBar,
@@ -10,10 +10,12 @@ import { styles } from './style';
 import { SettingsProps } from '../../navigation/types';
 import { useMachine } from '@xstate/react';
 import { machineConfig } from '../../XState/machineConfig';
+import { LogInMachineContext } from '../../XState/context';
 
-export const Settings = ({ navigation, route }) => {
+export const Settings = ({ navigation }: SettingsProps) => {
 
-  const [machine, setMachine] = useMachine(machineConfig);
+  // const [machine, setMachine] = useMachine(machineConfig);
+  const [machine, setMachine] = useContext(LogInMachineContext);
   console.log(machine.value);
   console.log(machine.context);
 
@@ -24,8 +26,6 @@ export const Settings = ({ navigation, route }) => {
   const updateSurname = (e: string) => {
     setMachine({ type: 'CHANGE_SURNAME', data: e });
   }
-
-  const { name, surname } = route.params;
   
   return (
     <View style={styles.settings_screen}>
@@ -42,9 +42,7 @@ export const Settings = ({ navigation, route }) => {
             placeholderTextColor="#8d96a1"
             onChangeText={updateName}
             onEndEditing={() => setMachine('NAME_BLUR')}
-            // defaultValue="Nikita"
-            defaultValue={JSON.stringify(name)}
-            // value={machine.context.name}
+            defaultValue={machine.context.name}
           />
         </View>
         <View style={styles.input_container}>
@@ -55,13 +53,12 @@ export const Settings = ({ navigation, route }) => {
             placeholderTextColor="#8d96a1"
             onChangeText={updateSurname}
             onEndEditing={() => setMachine('SURNAME_BLUR')}
-            // defaultValue="Zhilinsky"
-            defaultValue={JSON.stringify(surname)}
-            // value={machine.context.surname}
+            defaultValue={machine.context.surname}
           />
         </View>
         <TouchableOpacity
           style={styles.button}
+          onPress={() => navigation.navigate('Home')}
         >
           <Text style={styles.button_title}>Save Changes</Text>
         </TouchableOpacity>

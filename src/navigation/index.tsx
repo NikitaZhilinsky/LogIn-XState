@@ -11,10 +11,10 @@ const Stack = createStackNavigator();
 
 const StackNavigator = () => {
 
-  // const logInMachine = useMachine(machineConfig)
+  const logInMachine = useMachine(machineConfig)
 
   return (
-    // <LogInMachineContext.Provider value={logInMachine}>
+    <LogInMachineContext.Provider value={logInMachine}>
       <Stack.Navigator>
         <Stack.Screen 
           name="Home" 
@@ -48,7 +48,7 @@ const StackNavigator = () => {
           }} 
         />
       </Stack.Navigator>
-    // </LogInMachineContext.Provider>
+    </LogInMachineContext.Provider>
   );
 }
 

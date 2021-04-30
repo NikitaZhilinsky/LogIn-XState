@@ -19,8 +19,8 @@ import { LogInMachineContext } from '../../XState/context';
 
 export const Home = ({ navigation }: HomeProps) => {
 
-  const [machine, setMachine] = useMachine(machineConfig);
-  // const [machine, setMachine] = useContext(LogInMachineContext);
+  // const [machine, setMachine] = useMachine(machineConfig);
+  const [machine, setMachine] = useContext(LogInMachineContext);
   console.log(machine.value);
   console.log(machine.context);
 
@@ -32,27 +32,8 @@ export const Home = ({ navigation }: HomeProps) => {
     setMachine({ type: 'CHANGE_SURNAME', data: e });
   }
 
-  // const [form, setForm] = useState({
-  //   name: '',
-  //   surname: '',
-  // });
-  // console.log(form);
-
-  // const updateName = (text) => {
-  //   let temp = {...form}
-  //   temp.name = text
-  //   setForm(temp)
-  // }
-
-  // const updateSurname = (text) => {
-  //   let temp = {...form}
-  //   temp.surname = text
-  //   setForm(temp)
-  // }
-
   const [visible, setVisible] = useState(false);
 
-  // const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
   const submitClick = () => {
@@ -61,19 +42,7 @@ export const Home = ({ navigation }: HomeProps) => {
   }
 
   const settingsClick = () => {
-    // setMachine('SUBMIT');
-    navigation.navigate('Settings', { 
-        name: machine.context.name,
-        surname: machine.context.surname,
-      });
-    // (machine.matches({ nameError: 'tooShort' }) ||
-    // machine.matches({ surnameError: 'tooShort' })) ? 
-    // null
-    // :
-    // navigation.navigate('Settings', { 
-    //   name: machine.context.name,
-    //   surname: machine.context.surname,
-    // });
+    navigation.navigate('Settings');
   }
 
   const okClick = () => {
@@ -84,10 +53,7 @@ export const Home = ({ navigation }: HomeProps) => {
   const editClick = () => {
     setMachine('CHANGE');
     setVisible(false);
-    navigation.navigate('Settings', { 
-      name: machine.context.name,
-      surname: machine.context.surname,
-    });
+    navigation.navigate('Settings');
   }
   
   return (
@@ -103,7 +69,6 @@ export const Home = ({ navigation }: HomeProps) => {
         onChangeText={updateName}
         onEndEditing={() => setMachine('NAME_BLUR')}
         value={machine.context.name}
-        // value={form.name}
       />
       <Text style={styles.input_title}>Surname:</Text>
       <TextInput 
@@ -112,7 +77,6 @@ export const Home = ({ navigation }: HomeProps) => {
         onChangeText={updateSurname}
         onEndEditing={() => setMachine('SURNAME_BLUR')}
         value={machine.context.surname}
-        // value={form.surname}
       />
       <TouchableOpacity
         style={styles.button}

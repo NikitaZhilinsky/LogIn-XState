@@ -8,7 +8,7 @@ export interface Context {
 type Event = DoneInvokeEvent<any>;
 
 const isNameEmpty = (context: Context) => context.name.length === 0;
-const isSurnameEmpty = (context: Context, _) => context.surname.length == 0;
+const isSurnameEmpty = (context: Context) => context.surname.length == 0;
 
 export const machineConfig = Machine<Context, Event>(
   {
@@ -29,7 +29,6 @@ export const machineConfig = Machine<Context, Event>(
           },
           NAME_BLUR: {
             cond: isNameEmpty,
-            // cond: (context: Context, _) => context.name.length == 0,
             target: 'nameError.tooShort',
           },
           SURNAME_BLUR: {
@@ -39,7 +38,6 @@ export const machineConfig = Machine<Context, Event>(
           SUBMIT: [
             {
               cond: isNameEmpty,
-              // cond: (context: Context, _) => context.name.length == 0,
               target: 'nameError.tooShort',
             },
             {
@@ -47,7 +45,6 @@ export const machineConfig = Machine<Context, Event>(
               target: 'surnameError.tooShort',
             },
             {
-              // target: 'settingsEditing',
               target: 'submiting',
             },
           ], 
@@ -63,39 +60,6 @@ export const machineConfig = Machine<Context, Event>(
           },
         },
       },
-      // settingsEditing: {
-      //   on: {
-      //     CHANGE_NAME: {
-      //       actions: 'changeUserName',
-      //     },
-      //     CHANGE_SURNAME: {
-      //       actions: 'changeUserSurname',
-      //     },
-      //     NAME_BLUR: {
-      //       cond: isNameEmpty,
-      //       // cond: (context: Context, _) => context.name.length == 0,
-      //       target: 'nameError.tooShort',
-      //     },
-      //     SURNAME_BLUR: {
-      //       cond: isSurnameEmpty,
-      //       target: 'surnameError.tooShort',
-      //     },
-      //     SUBMIT: [
-      //       {
-      //         cond: isNameEmpty,
-      //         // cond: (context: Context, _) => context.name.length == 0,
-      //         target: 'nameError.tooShort',
-      //       },
-      //       {
-      //         cond: isSurnameEmpty,
-      //         target: 'surnameError.tooShort',
-      //       },
-      //       {
-      //         target: 'editing',
-      //       },
-      //     ], 
-      //   },
-      // },
       nameError: {
         on: {
           CHANGE_NAME: {
